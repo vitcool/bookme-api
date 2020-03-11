@@ -1,0 +1,38 @@
+{
+  "name": "bookme",
+  "version": "1.0.0",
+  "description": "My NodeJS API for bookme service",
+  "main": "index.js",
+  "scripts": {
+    "dev": "env-cmd -f ./config/dev.env nodemon src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "precommit": "./node_modules/.bin/eslint --ignore-path .gitignore . --max-warnings=0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/vitcool/bookme-api.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vitcool/bookme-api/issues"
+  },
+  "homepage": "https://github.com/vitcool/bookme-api#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "env-cmd": "^10.1.0",
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-import": "^2.20.1",
+    "husky": "^4.2.3",
+    "nodemon": "^2.0.2",
+    "prettier": "^1.19.1"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run precommit"
+    }
+  }
+}
