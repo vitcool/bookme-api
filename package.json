@@ -19,7 +19,9 @@
   },
   "homepage": "https://github.com/vitcool/bookme-api#readme",
   "dependencies": {
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "mongoose": "^5.9.4",
+    "validator": "^12.2.0"
   },
   "devDependencies": {
     "env-cmd": "^10.1.0",
