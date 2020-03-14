@@ -35,6 +35,10 @@ const userSchema = new mongoose.Schema(
       trim: true,
       minlength: 6,
     },
+    isTasker: {
+      type: Boolean,
+      required: true,
+    },
     tokens: [
       {
         token: {
