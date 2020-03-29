@@ -62,9 +62,16 @@ router.patch('/users/me', auth, async (req, res) => {
   return req.status(400).send();
 });
 
-// add user middleware
-// add get user info endpoint
-// add the ability to create two types of users - bookers and taskers
-// add update user endpoint
+router.post('/users/logout', auth, async (req, res) => {
+  try {
+    const newTokens = req.user.tokens.filter((token) => token.token !== req.token);
+    req.user.tokens = newTokens;
+
+    await req.user.save();
+    res.send();
+  } catch (e) {
+    res.status(500).send();
+  }
+});
 
 module.exports = router;
