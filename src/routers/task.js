@@ -12,22 +12,12 @@ const router = new express.Router();
  * /task:
  *  post:
  *    description: Use to create new task
- *    parameters:
- *       - name: title
- *         description: Title of task
- *         in: formData
+ *    requestBody:
  *         required: true
- *         type: string
- *       - name: description
- *         description: Description of the task
- *         in: formData
- *         required: true
- *         type: string
- *       - name: status
- *         description: Status of the task
- *         in: formData
- *         required: true
- *         type: string
+ *         content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/Task'
  *    responses:
  *      '201':
  *        description: A successfully created task

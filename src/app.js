@@ -12,6 +12,7 @@ const taskRouter = require('./routers/task');
 // Extended: https://swagger.io/specification/#infoObject
 const swaggerOptions = {
   swaggerDefinition: {
+    openapi: '3.0.1',
     info: {
       title: 'BookMe API',
       description: 'BookMe API Information',
@@ -20,8 +21,22 @@ const swaggerOptions = {
       },
       servers: ['http://localhost:3000'],
     },
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        },
+      },
+    },
+    security: [
+      {
+        bearerAuth: [],
+      },
+    ],
   },
-  apis: ['src/routers/*.js'],
+  apis: ['src/routers/*.js', 'src/models/*.js'],
 };
 
 const app = express();

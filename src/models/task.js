@@ -1,5 +1,31 @@
 const mongoose = require('mongoose');
 
+/**
+ * @swagger
+ *  components:
+ *    schemas:
+ *      Task:
+ *        type: object
+ *        required:
+ *          - title
+ *          - description
+ *          - status
+ *        properties:
+ *          title:
+ *            type: string
+ *            description: Title of the task
+ *          description:
+ *            type: string
+ *            description: Description of the task
+ *          status:
+ *            type: string
+ *            description: Status of the task
+ *        example:
+ *           name: Test
+ *           description: Test task description
+ *           status: open
+ */
+
 const taskSchema = new mongoose.Schema(
   {
     title: {
