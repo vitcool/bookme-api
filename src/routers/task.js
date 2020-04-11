@@ -39,7 +39,7 @@ router.post('/task', auth, async (req, res) => {
 });
 
 
-//need to add count for the great FE pagination + docsumentation
+// need to add count for the great FE pagination + docsumentation
 router.get('/tasks', auth, async (req, res) => {
   const { status, skip, limit } = req.query;
   try {
