@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable no-underscore-dangle */
 const express = require('express');
 
@@ -38,10 +39,38 @@ router.post('/task', auth, async (req, res) => {
   }
 });
 
-
-// need to add count for the great FE pagination + docsumentation
+/**
+ * @swagger
+ * /tasks:
+ *  get:
+ *    description: Use to create new task
+ *    parameters:
+ *       - in: query
+ *         name: skip
+ *         schema:
+ *           type: integer
+ *         description: The number of items to skip before starting to collect the result set
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: The numbers of items to return
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *         description: status of tasks to return
+ *    responses:
+ *      '200':
+ *        description: A successfully performed request
+ *      '401':
+ *        description: Unauth
+ *      '500':
+ *         description: Something went wrong
+ */
 router.get('/tasks', auth, async (req, res) => {
   const { status, skip, limit } = req.query;
+  let total;
   try {
     const filter = {
       ...(status ? { status } : {}),
@@ -50,8 +79,14 @@ router.get('/tasks', auth, async (req, res) => {
       ...(skip ? { skip: +skip } : {}),
       ...(limit ? { limit: +limit } : {}),
     };
+    await Task.countDocuments({ ...filter }, (err, count) => {
+      if (err) {
+        console.log('error', err);
+      }
+      total = count;
+    });
     const tasks = await Task.find({ ...filter }, null, pagination);
-    res.status(200).send(tasks);
+    res.status(200).send({ tasks, total });
   } catch (e) {
     res.status(500).send(e.message);
   }
