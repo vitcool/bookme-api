@@ -13,6 +13,7 @@ const router = new express.Router();
  * @swagger
  * /task:
  *  post:
+ *    summary: create new task
  *    description: Use to create new task
  *    requestBody:
  *         required: true
@@ -44,7 +45,8 @@ router.post('/task', auth, async (req, res) => {
  * @swagger
  * /tasks:
  *  get:
- *    description: Use to create new task
+ *    summary: get list of tasks
+ *    description: Use to get list of tasks
  *    parameters:
  *       - in: query
  *         name: skip
@@ -93,6 +95,26 @@ router.get('/tasks', auth, async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /tasks/{id}:
+ *  get:
+ *    summary: Get a task by ID
+ *    parameters:
+ *      - in: path
+ *        name: id
+ *        schema:
+ *          type: integer
+ *        required: true
+ *        description: Numeric ID of the user to get
+ *    responses:
+ *      '200':
+ *        description: A successfully performed request
+ *      '401':
+ *        description: Unauth
+ *      '500':
+ *        description: Something went wrong
+ */
 // need to add documentation
 router.get('/task/:id', auth, async (req, res) => {
   const _id = req.params.id;
