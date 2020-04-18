@@ -84,21 +84,80 @@ router.get('/tasks', auth, async (req, res) => {
       ...(limit ? { limit: +limit } : {}),
     };
     if (req.user) {
+      await Task.countDocuments({ ...filter }, (err, count) => {
+        if (err) {
+          console.log('error', err);
+        }
+        total = count;
+      });
+      const tasks = await Task.find({ ...filter }, null, pagination);
+      res.status(200).send({ tasks, total });
+    }
+  } catch (e) {
+    res.status(500).send(e.message);
+  }
+});
+
+
+/**
+ * @swagger
+ * /tasks:
+ *  get:
+ *    summary: get list of tasks created by current user
+ *    description: Use to get list of tasks
+ *    parameters:
+ *       - in: query
+ *         name: skip
+ *         schema:
+ *           type: integer
+ *         description: The number of items to skip before starting to collect the result set
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: The numbers of items to return
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *         description: status of tasks to return
+ *    responses:
+ *      '200':
+ *        description: A successfully performed request
+ *      '401':
+ *        description: Unauth
+ *      '500':
+ *         description: Something went wrong
+ */
+router.get('/tasks/my', auth, async (req, res) => {
+  const { status, skip, limit } = req.query;
+  let total;
+  try {
+    const filter = {
+      ...(status ? { status } : {}),
+    };
+    const pagination = {
+      ...(skip ? { skip: +skip } : {}),
+      ...(limit ? { limit: +limit } : {}),
+    };
+    if (req.user) {
       const { isTasker } = req.user;
-      if (isTasker) {
-        await Task.countDocuments({ ...filter }, (err, count) => {
+      const isBooker = !isTasker;
+      if (isBooker) {
+        await Task.countDocuments({ ...filter, ownerId: req.user._id }, (err, count) => {
           if (err) {
             console.log('error', err);
           }
           total = count;
         });
-        const tasks = await Task.find({ ...filter }, null, pagination);
-        res.status(200).send({ tasks, total });
-      } else {
-        await req.user.populate({
-          path: 'tasks',
-        }).execPopulate();
-        res.send(req.user.tasks);
+        await req.user
+          .populate({
+            path: 'tasks',
+            match: filter,
+            options: pagination,
+          })
+          .execPopulate();
+        res.send({ tasks: req.user.tasks, total });
       }
     }
   } catch (e) {

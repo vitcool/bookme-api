@@ -6,6 +6,63 @@ const validator = require('validator');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
+/**
+ * @swagger
+ *  components:
+ *    schemas:
+ *      User:
+ *        type: object
+ *        required:
+ *          - firstName
+ *          - secondName
+ *          - email
+ *          - password
+ *          - isTasker
+ *        properties:
+ *          firstName:
+ *            type: string
+ *            description: First name of the user
+ *          secondName:
+ *            type: string
+ *            description: Second name of the user
+ *          email:
+ *            type: string
+ *            description: Email of the user
+ *          password:
+ *            type: string
+ *            description: Password of the user
+ *          isTasker:
+ *            type: boolean
+ *            description: Define is user tasker or no
+ *        example:
+ *           firstName: Test
+ *           secondName: Test
+ *           email: test@test.com
+ *           password: testtest
+ *           isTasker: false
+ */
+
+/**
+ * @swagger
+ *  components:
+ *    schemas:
+ *      UserLogin:
+ *        type: object
+ *        required:
+ *          - email
+ *          - password
+ *        properties:
+ *          email:
+ *            type: string
+ *            description: Email of the user
+ *          password:
+ *            type: string
+ *            description: Password of the user
+ *        example:
+ *           email: test@test.com
+ *           password: testtest
+ */
+
 const userSchema = new mongoose.Schema(
   {
     firstName: {
