@@ -1,9 +1,6 @@
-/* eslint-disable consistent-return */
-/* eslint-disable no-console */
-/* eslint-disable no-underscore-dangle */
 const express = require('express');
 
-const Task = require('../models/task');
+const TaskController = require('../controllers/task');
 
 const auth = require('../middlewares/auth');
 
@@ -29,17 +26,8 @@ const router = new express.Router();
  *      '500':
  *         description: Something went wrong
  */
-router.post('/tasks', auth, async (req, res) => {
-  const { body } = req;
-  const { _id, fullName } = req.user;
-  const task = new Task({ ...body, ownerId: _id, ownerFullName: fullName });
-
-  try {
-    await task.save();
-    res.status(201).send(task);
-  } catch (e) {
-    res.status(500).send(e.message);
-  }
+router.post('/tasks', auth, (req, res) => {
+  TaskController.createTask(req, res);
 });
 
 /**
@@ -73,29 +61,7 @@ router.post('/tasks', auth, async (req, res) => {
  *         description: Something went wrong
  */
 router.get('/tasks', auth, async (req, res) => {
-  const { status, skip, limit } = req.query;
-  let total;
-  try {
-    const filter = {
-      ...(status ? { status } : {}),
-    };
-    const pagination = {
-      ...(skip ? { skip: +skip } : {}),
-      ...(limit ? { limit: +limit } : {}),
-    };
-    if (req.user) {
-      await Task.countDocuments({ ...filter }, (err, count) => {
-        if (err) {
-          console.log('error', err);
-        }
-        total = count;
-      });
-      const tasks = await Task.find({ ...filter }, null, pagination);
-      res.status(200).send({ tasks, total });
-    }
-  } catch (e) {
-    res.status(500).send(e.message);
-  }
+  TaskController.getTasksList(req, res);
 });
 
 
@@ -130,39 +96,7 @@ router.get('/tasks', auth, async (req, res) => {
  *         description: Something went wrong
  */
 router.get('/tasks/my', auth, async (req, res) => {
-  const { status, skip, limit } = req.query;
-  let total;
-  try {
-    const filter = {
-      ...(status ? { status } : {}),
-    };
-    const pagination = {
-      ...(skip ? { skip: +skip } : {}),
-      ...(limit ? { limit: +limit } : {}),
-    };
-    if (req.user) {
-      const { isTasker } = req.user;
-      const isBooker = !isTasker;
-      if (isBooker) {
-        await Task.countDocuments({ ...filter, ownerId: req.user._id }, (err, count) => {
-          if (err) {
-            console.log('error', err);
-          }
-          total = count;
-        });
-        await req.user
-          .populate({
-            path: 'tasks',
-            match: filter,
-            options: pagination,
-          })
-          .execPopulate();
-        res.send({ tasks: req.user.tasks, total });
-      }
-    }
-  } catch (e) {
-    res.status(500).send(e.message);
-  }
+  TaskController.getTasksOfCurrentUser(req, res);
 });
 
 /**
@@ -187,16 +121,7 @@ router.get('/tasks/my', auth, async (req, res) => {
  */
 // need to add documentation
 router.get('/tasks/:id', auth, async (req, res) => {
-  const _id = req.params.id;
-  try {
-    const task = await Task.findOne({ _id });
-    if (!task) {
-      return res.status(404).send();
-    }
-    return res.send(task);
-  } catch (e) {
-    res.status(500).send(e);
-  }
+  TaskController.getTaskById(req, res);
 });
 
 
@@ -221,29 +146,7 @@ router.get('/tasks/:id', auth, async (req, res) => {
  *         description: Something went wrong
  */
 router.patch('/tasks/:id', auth, async (req, res) => {
-  const { body, user } = req;
-  const { _id: userId } = user;
-  const _id = req.params.id;
-  const task = await Task.findOne({ _id });
-  const { ownerId } = task;
-  const isUpdateAllowwed = `${userId}` === `${ownerId}`;
-  if (!task) {
-    return res.status(404).send();
-  }
-  if (isUpdateAllowwed) {
-    const allowedUpdates = ['title', 'description', 'status'];
-    const updates = Object.keys(body);
-    const isValidUpdate = updates.every((update) => allowedUpdates.includes(update));
-
-    if (isValidUpdate) {
-      updates.forEach((update) => {
-        task[update] = body[update];
-      });
-      await task.save();
-      return res.send(task);
-    }
-  }
-  return res.status(400).send();
+  TaskController.updateTask(req, res);
 });
 
 module.exports = router;

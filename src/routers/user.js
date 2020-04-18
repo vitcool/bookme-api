@@ -1,8 +1,6 @@
-/* eslint-disable consistent-return */
-/* eslint-disable no-underscore-dangle */
 const express = require('express');
 
-const User = require('../models/user');
+const UserController = require('../controllers/user');
 
 const auth = require('../middlewares/auth');
 
@@ -28,17 +26,8 @@ const router = new express.Router();
  *      '500':
  *         description: Something went wrong
  */
-router.post('/users', async (req, res) => {
-  const { body } = req;
-  const user = new User(body);
-
-  try {
-    await user.save();
-    const token = await user.generateAuthToken();
-    res.status(201).send({ user, token });
-  } catch (e) {
-    res.status(500).send(e.message);
-  }
+router.post('/users', (req, res) => {
+  UserController.createUser(req, res);
 });
 
 /**
@@ -61,17 +50,8 @@ router.post('/users', async (req, res) => {
  *      '500':
  *         description: Something went wrong
  */
-router.post('/users/login', async (req, res) => {
-  const { body } = req;
-  const { email, password } = body;
-
-  try {
-    const user = await User.findByCredentials(email, password);
-    const token = await user.generateAuthToken();
-    res.send({ token, user });
-  } catch (e) {
-    res.status(400).send(e.message);
-  }
+router.post('/users/login', (req, res) => {
+  UserController.login(req, res);
 });
 
 /**
@@ -88,12 +68,8 @@ router.post('/users/login', async (req, res) => {
  *      '500':
  *         description: Something went wrong
  */
-router.get('/users/me', auth, async (req, res) => {
-  try {
-    res.send(req.user);
-  } catch (e) {
-    res.status(500).send(e);
-  }
+router.get('/users/me', auth, (req, res) => {
+  UserController.getCurrentUserProfile(req, res);
 });
 
 /**
@@ -116,17 +92,8 @@ router.get('/users/me', auth, async (req, res) => {
  *      '500':
  *        description: Something went wrong
  */
-router.get('/users/:id', auth, async (req, res) => {
-  const _id = req.params.id;
-  try {
-    const user = await User.findOne({ _id });
-    if (!user) {
-      return res.status(404).send();
-    }
-    return res.send(user);
-  } catch (e) {
-    res.status(500).send(e);
-  }
+router.get('/users/:id', auth, (req, res) => {
+  UserController.getUserProfileById(req, res);
 });
 
 /**
@@ -149,26 +116,8 @@ router.get('/users/:id', auth, async (req, res) => {
  *      '500':
  *         description: Something went wrong
  */
-router.patch('/users/me', auth, async (req, res) => {
-  const { user, body } = req;
-  const updates = Object.keys(body);
-
-  const allowedUpdates = ['firstName', 'secondName', 'email', 'password', 'isTasker'];
-  const isValidUpdate = updates.every((update) => allowedUpdates.includes(update));
-
-  if (isValidUpdate) {
-    try {
-      updates.forEach((update) => {
-        user[update] = body[update];
-      });
-
-      await req.user.save();
-      return res.send(req.user);
-    } catch (e) {
-      res.status(500).send(e);
-    }
-  }
-  return res.status(400).send();
+router.patch('/users/me', auth, (req, res) => {
+  UserController.updateCurrentUser(req, res);
 });
 
 /**
@@ -185,16 +134,8 @@ router.patch('/users/me', auth, async (req, res) => {
  *      '500':
  *         description: Something went wrong
  */
-router.post('/users/logout', auth, async (req, res) => {
-  try {
-    const newTokens = req.user.tokens.filter((token) => token.token !== req.token);
-    req.user.tokens = newTokens;
-
-    await req.user.save();
-    res.send();
-  } catch (e) {
-    res.status(500).send();
-  }
+router.post('/users/logout', auth, (req, res) => {
+  UserController.logout(req, res);
 });
 
 module.exports = router;
