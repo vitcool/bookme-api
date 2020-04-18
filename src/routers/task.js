@@ -85,7 +85,6 @@ router.get('/tasks', auth, async (req, res) => {
     };
     if (req.user) {
       const { isTasker } = req.user;
-      console.log('isTasker', isTasker);
       if (isTasker) {
         await Task.countDocuments({ ...filter }, (err, count) => {
           if (err) {
