@@ -83,6 +83,14 @@ const logout = async (req, res) => {
   }
 };
 
+const deleteCurrentUser = async (req, res) => {
+  try {
+    await req.user.remove();
+  } catch (e) {
+    res.status(500).send();
+  }
+};
+
 module.exports = {
   createUser,
   login,
@@ -90,4 +98,5 @@ module.exports = {
   getUserProfileById,
   updateCurrentUser,
   logout,
+  deleteCurrentUser,
 };

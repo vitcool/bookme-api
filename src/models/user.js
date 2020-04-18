@@ -6,6 +6,8 @@ const validator = require('validator');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
+const Task = require('../models/task');
+
 /**
  * @swagger
  *  components:
@@ -162,6 +164,13 @@ userSchema.pre('save', async function (next) {
     user.password = await bcrypt.hash(user.password, 8);
   }
 
+  next();
+});
+
+// delete user tasks when user is removed
+userSchema.pre('remove', async function (next) {
+  const user = this;
+  await Task.deleteMany({ ownerId: user._id });
   next();
 });
 

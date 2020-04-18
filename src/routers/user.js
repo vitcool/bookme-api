@@ -138,4 +138,27 @@ router.post('/users/logout', auth, (req, res) => {
   UserController.logout(req, res);
 });
 
+/**
+ * @swagger
+ * /users/logout:
+ *  delete:
+ *    summary: remove current user
+ *    description: remove current token
+ *    responses:
+ *      '200':
+ *        description: A successfully performed request
+ *      '401':
+ *        description: Unauth
+ *      '500':
+ *         description: Something went wrong
+ */
+router.delete('/users/me', auth, (req, res) => {
+  try {
+    UserController.deleteCurrentUser(req, res);
+    res.send(req.user);
+  } catch (e) {
+    res.status(500).send(e.message);
+  }
+});
+
 module.exports = router;
