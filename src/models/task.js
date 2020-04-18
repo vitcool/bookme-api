@@ -1,3 +1,4 @@
+/* eslint-disable func-names */
 const mongoose = require('mongoose');
 
 /**
@@ -41,8 +42,13 @@ const taskSchema = new mongoose.Schema(
       type: String,
       default: false,
     },
-    owner: {
+    ownerId: {
       type: mongoose.Schema.Types.ObjectId,
+      require: true,
+      ref: 'User',
+    },
+    ownerFullName: {
+      type: String,
       require: true,
       ref: 'User',
     },

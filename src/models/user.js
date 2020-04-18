@@ -53,6 +53,16 @@ const userSchema = new mongoose.Schema(
   },
 );
 
+userSchema.virtual('tasks', {
+  ref: 'Task',
+  localField: '_id',
+  foreignField: 'ownerId',
+});
+
+userSchema.virtual('fullName').get(function () {
+  return `${this.firstName} ${this.secondName}`;
+});
+
 userSchema.methods.toJSON = function () {
   const user = this;
   const publicUser = user.toObject();

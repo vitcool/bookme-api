@@ -31,7 +31,8 @@ const router = new express.Router();
  */
 router.post('/task', auth, async (req, res) => {
   const { body } = req;
-  const task = new Task({ ...body, owner: req.user._id });
+  const { _id, fullName } = req.user;
+  const task = new Task({ ...body, ownerId: _id, ownerFullName: fullName });
 
   try {
     await task.save();
@@ -82,14 +83,25 @@ router.get('/tasks', auth, async (req, res) => {
       ...(skip ? { skip: +skip } : {}),
       ...(limit ? { limit: +limit } : {}),
     };
-    await Task.countDocuments({ ...filter }, (err, count) => {
-      if (err) {
-        console.log('error', err);
+    if (req.user) {
+      const { isTasker } = req.user;
+      console.log('isTasker', isTasker);
+      if (isTasker) {
+        await Task.countDocuments({ ...filter }, (err, count) => {
+          if (err) {
+            console.log('error', err);
+          }
+          total = count;
+        });
+        const tasks = await Task.find({ ...filter }, null, pagination);
+        res.status(200).send({ tasks, total });
+      } else {
+        await req.user.populate({
+          path: 'tasks',
+        }).execPopulate();
+        res.send(req.user.tasks);
       }
-      total = count;
-    });
-    const tasks = await Task.find({ ...filter }, null, pagination);
-    res.status(200).send({ tasks, total });
+    }
   } catch (e) {
     res.status(500).send(e.message);
   }
@@ -120,6 +132,8 @@ router.get('/task/:id', auth, async (req, res) => {
   const _id = req.params.id;
   try {
     const task = await Task.findOne({ _id });
+    task.populate('owner').execPopulate();
+    console.log('task', task.owner);
     if (!task) {
       return res.status(404).send();
     }
