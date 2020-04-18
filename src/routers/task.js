@@ -176,7 +176,7 @@ router.get('/tasks/my', auth, async (req, res) => {
  *        schema:
  *          type: integer
  *        required: true
- *        description: Numeric ID of the user to get
+ *        description: Numeric ID of the task to get
  *    responses:
  *      '200':
  *        description: A successfully performed request
@@ -190,8 +190,6 @@ router.get('/task/:id', auth, async (req, res) => {
   const _id = req.params.id;
   try {
     const task = await Task.findOne({ _id });
-    task.populate('owner').execPopulate();
-    console.log('task', task.owner);
     if (!task) {
       return res.status(404).send();
     }

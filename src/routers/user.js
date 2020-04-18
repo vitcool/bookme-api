@@ -1,3 +1,5 @@
+/* eslint-disable consistent-return */
+/* eslint-disable no-underscore-dangle */
 const express = require('express');
 
 const User = require('../models/user');
@@ -89,6 +91,39 @@ router.post('/users/login', async (req, res) => {
 router.get('/users/me', auth, async (req, res) => {
   try {
     res.send(req.user);
+  } catch (e) {
+    res.status(500).send(e);
+  }
+});
+
+/**
+ * @swagger
+ * /users/{id}:
+ *  get:
+ *    summary: Get a user by ID
+ *    parameters:
+ *      - in: path
+ *        name: id
+ *        schema:
+ *          type: integer
+ *        required: true
+ *        description: Numeric ID of the user to get
+ *    responses:
+ *      '200':
+ *        description: A successfully performed request
+ *      '401':
+ *        description: Unauth
+ *      '500':
+ *        description: Something went wrong
+ */
+router.get('/users/:id', auth, async (req, res) => {
+  const _id = req.params.id;
+  try {
+    const user = await User.findOne({ _id });
+    if (!user) {
+      return res.status(404).send();
+    }
+    return res.send(user);
   } catch (e) {
     res.status(500).send(e);
   }
