@@ -165,10 +165,10 @@ router.patch('/users/me', auth, async (req, res) => {
       await req.user.save();
       return res.send(req.user);
     } catch (e) {
-      req.status(500).send(e);
+      res.status(500).send(e);
     }
   }
-  return req.status(400).send();
+  return res.status(400).send();
 });
 
 /**

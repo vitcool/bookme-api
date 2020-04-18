@@ -29,7 +29,7 @@ const router = new express.Router();
  *      '500':
  *         description: Something went wrong
  */
-router.post('/task', auth, async (req, res) => {
+router.post('/tasks', auth, async (req, res) => {
   const { body } = req;
   const { _id, fullName } = req.user;
   const task = new Task({ ...body, ownerId: _id, ownerFullName: fullName });
@@ -186,7 +186,7 @@ router.get('/tasks/my', auth, async (req, res) => {
  *        description: Something went wrong
  */
 // need to add documentation
-router.get('/task/:id', auth, async (req, res) => {
+router.get('/tasks/:id', auth, async (req, res) => {
   const _id = req.params.id;
   try {
     const task = await Task.findOne({ _id });
@@ -197,6 +197,53 @@ router.get('/task/:id', auth, async (req, res) => {
   } catch (e) {
     res.status(500).send(e);
   }
+});
+
+
+/**
+ * @swagger
+ * /tasks/{id}:
+ *  patch:
+ *    summary: update task by id
+ *    description: Use to update the task by id
+ *    requestBody:
+ *      required: true
+ *      content:
+ *       application/json:
+ *         schema:
+ *           $ref: '#/components/schemas/Task'
+ *    responses:
+ *      '200':
+ *        description: A successfully performed request
+ *      '401':
+ *        description: Unauth
+ *      '500':
+ *         description: Something went wrong
+ */
+router.patch('/tasks/:id', auth, async (req, res) => {
+  const { body, user } = req;
+  const { _id: userId } = user;
+  const _id = req.params.id;
+  const task = await Task.findOne({ _id });
+  const { ownerId } = task;
+  const isUpdateAllowwed = `${userId}` === `${ownerId}`;
+  if (!task) {
+    return res.status(404).send();
+  }
+  if (isUpdateAllowwed) {
+    const allowedUpdates = ['title', 'description', 'status'];
+    const updates = Object.keys(body);
+    const isValidUpdate = updates.every((update) => allowedUpdates.includes(update));
+
+    if (isValidUpdate) {
+      updates.forEach((update) => {
+        task[update] = body[update];
+      });
+      await task.save();
+      return res.send(task);
+    }
+  }
+  return res.status(400).send();
 });
 
 module.exports = router;
