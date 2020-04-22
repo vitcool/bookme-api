@@ -6,7 +6,7 @@ const swaggerJsDoc = require('swagger-jsdoc');
 require('./db/mongoose');
 
 const testRouter = require('./routers/test');
-const userRouter = require('./routers/user');
+const authRouter = require('./routers/auth');
 const taskRouter = require('./routers/task');
 
 // Extended: https://swagger.io/specification/#infoObject
@@ -48,7 +48,7 @@ app.use(cors());
 
 app.use(express.json());
 app.use(testRouter);
-app.use(userRouter);
+app.use(authRouter);
 app.use(taskRouter);
 
 module.exports = app;
