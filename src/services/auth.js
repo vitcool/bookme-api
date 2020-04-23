@@ -2,11 +2,15 @@
 /* eslint-disable no-console */
 const User = require('../models/user');
 
+const EmailService = require('../services/email');
+
 class AuthService {
   static async signUp(userData) {
     try {
+      const { firstName, email } = userData;
       const user = new User(userData);
       const token = await user.generateAuthToken();
+      EmailService.sendWelcomeEmail(email, firstName);
       return { user, token };
     } catch (e) {
       console.error(`AuthService.signUp error - ${e.message}`);
