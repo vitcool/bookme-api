@@ -1,6 +1,6 @@
 const express = require('express');
 
-const TaskController = require('../controllers/task');
+const TaskService = require('../services/task');
 
 const auth = require('../middlewares/auth');
 
@@ -26,8 +26,15 @@ const router = new express.Router();
  *      '500':
  *         description: Something went wrong
  */
-router.post('/tasks', auth, (req, res) => {
-  TaskController.createTask(req, res);
+router.post('/tasks', auth, async (req, res) => {
+  try {
+    const { body, user } = req;
+    const task = TaskService.createTask(body, user);
+    await task.save();
+    res.status(201).send(task);
+  } catch (e) {
+    res.status(500).send(e.message);
+  }
 });
 
 /**
@@ -61,9 +68,19 @@ router.post('/tasks', auth, (req, res) => {
  *         description: Something went wrong
  */
 router.get('/tasks', auth, async (req, res) => {
-  TaskController.getTasksList(req, res);
+  try {
+    const { query, user } = req;
+    const tasksList = await TaskService.getTasksList(query, user);
+    if (tasksList) {
+      res.status(200).send(tasksList);
+    }
+    if (!tasksList) {
+      res.status(400).send();
+    }
+  } catch (e) {
+    res.status(500).send(e.message);
+  }
 });
-
 
 /**
  * @swagger
@@ -96,7 +113,18 @@ router.get('/tasks', auth, async (req, res) => {
  *         description: Something went wrong
  */
 router.get('/tasks/my', auth, async (req, res) => {
-  TaskController.getTasksOfCurrentUser(req, res);
+  try {
+    const { query, user } = req;
+    const tasksList = await TaskService.getCurrentUserTasks(query, user);
+    if (tasksList) {
+      res.status(200).send(tasksList);
+    }
+    if (!tasksList) {
+      res.status(400).send();
+    }
+  } catch (e) {
+    res.status(500).send(e.message);
+  }
 });
 
 /**
@@ -121,9 +149,17 @@ router.get('/tasks/my', auth, async (req, res) => {
  */
 // need to add documentation
 router.get('/tasks/:id', auth, async (req, res) => {
-  TaskController.getTaskById(req, res);
+  try {
+    const { _id: id } = req.params;
+    const task = await TaskService.getTaskById(id);
+    if (!task) {
+      return res.status(404).send();
+    }
+    return res.send(task);
+  } catch (e) {
+    return res.status(500).send(e);
+  }
 });
-
 
 /**
  * @swagger
@@ -146,7 +182,18 @@ router.get('/tasks/:id', auth, async (req, res) => {
  *         description: Something went wrong
  */
 router.patch('/tasks/:id', auth, async (req, res) => {
-  TaskController.updateTask(req, res);
+  try {
+    const { body, user } = req;
+    const { id } = req.params;
+    const task = TaskService.updateTask(id, body, user);
+    if (!task) {
+      return res.status(404).send();
+    }
+    await task.save();
+    return res.send(task);
+  } catch (e) {
+    return res.status(500).send(e);
+  }
 });
 
 module.exports = router;
